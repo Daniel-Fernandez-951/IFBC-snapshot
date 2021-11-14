@@ -56,6 +56,13 @@ tt_start = time.time()
 
 
 def make_zip(blockchain_path=BLOCKCHAIN_PATH):
+  """ 'Zip' up blockchain 
+
+    :param file_name: File to upload
+    :param bucket: Bucket to upload to
+    :param object_name: S3 object name. If not specified then file_name is used
+    :return: True if file was uploaded, else False
+    """
     zip_start = time.time()
     # Change to saving directory
     os.chdir(TEMP_DIR)
