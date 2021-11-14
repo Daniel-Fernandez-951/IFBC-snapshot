@@ -11,8 +11,10 @@ Then add your AWS Credentials (hardcoded or in ENV):
     export ACCESS_KEY= <your secret>
     export SECRET_KEY= <your secret>
     
-NOTE: Wallet name not default? Change script variable
-    WALLET_NAME
+NOTE:
+    Wallet name not default? Change this variable:              WALLET_NAME
+    Change compression type (zip, tar, gztar, bztar, xztar):    COMP_FORMAT
+
     
 
 This script should work anywhere it is place, directories created are all
@@ -30,11 +32,11 @@ import datetime
 import subprocess
 from botocore.exceptions import ClientError
 
-# App version
-VERSION = 0.3
+VERSION = 0.4
 
-# Default wallet name
+# Configurable Variables
 WALLET_NAME = 'default'
+COMP_FORMAT = 'zip'
 
 HOME = os.environ['HOME']
 FILENAME_UTC = 'ironfish_db'
@@ -62,7 +64,7 @@ def make_zip():
     # Make ZIP of directory
     try:
         shutil.make_archive(FILENAME_UTC,
-                            'zip',
+                            COMP_FORMAT,
                             BLOCKCHAIN_PATH)
         logging.info(f"Zipping Finished: {time.time() - zip_start}")
     except FileNotFoundError or FileExistsError as e_zip:
@@ -71,12 +73,14 @@ def make_zip():
         return True
 
 
-def upload_file(file_name=f"{FILENAME_UTC}.zip", bucket=BUCKET, object_name=f"{FILENAME_UTC}.zip"):
+def upload_file(file_name=f"{FILENAME_UTC}.{COMP_FORMAT}",
+                object_name=f"{FILENAME_UTC}.{COMP_FORMAT}",
+                bucket=BUCKET):
     """Upload a file to an S3 bucket
 
     :param file_name: File to upload
     :param bucket: Bucket to upload to
-    :param object_name: S3 object name. If not specified then file_name is used
+    :param object_name: S3 object name.
     :return: True if file was uploaded, else False
     """
     # Upload the file
@@ -86,7 +90,7 @@ def upload_file(file_name=f"{FILENAME_UTC}.zip", bucket=BUCKET, object_name=f"{F
                              aws_secret_access_key=os.environ['SECRET_KEY'])
     try:
         response = s3_client.upload_file(file_name, bucket, object_name, ExtraArgs={'ACL': 'public-read'})
-        logging.info(f"Upload Finished: {time.time() - up_start}")
+        logging.info(f"Upload Finished: {time.time() - up_start}\nResponse: {response}")
     except ClientError as e_upload:
         logging.error(f"Upload Error: \n{e_upload}", exc_info=True)
         return False
@@ -104,7 +108,7 @@ def main():
 
 
 if __name__ == '__main__':
-    logging.info(f"{'-'*10}Uploader Started: {datetime.datetime.utcnow()}{'-' * 10}")
+    logging.info(f"{'-' * 10}Uploader Started: {datetime.datetime.utcnow()}{'-' * 10}")
     try:
         main()
         tt_end = time.time()
