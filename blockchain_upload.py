@@ -10,6 +10,10 @@ After downloading (or copying) the script, run this command (Linux/UNIX):
 Then add your AWS Credentials (hardcoded or in ENV):
     export ACCESS_KEY= <your secret>
     export SECRET_KEY= <your secret>
+    
+NOTE: Wallet name not default? Change script variable
+    WALLET_NAME
+    
 
 This script should work anywhere it is place, directories created are all
 relative to where the script is when executed.
@@ -26,13 +30,17 @@ import datetime
 import subprocess
 from botocore.exceptions import ClientError
 
-VERSION = 0.2
+# App version
+VERSION = 0.3
+
+# Default wallet name
+WALLET_NAME = 'default'
 
 HOME = os.environ['HOME']
 FILENAME_UTC = 'ironfish_db'
 BUCKET = 'y3oclgak3p951zai'
 OBJECT_NAME = "IronFishBlockchain/"
-BLOCKCHAIN_PATH = f'{HOME}/.ironfish/databases/default'
+BLOCKCHAIN_PATH = f'{HOME}/.ironfish/databases/{WALLET_NAME}'
 TEMP_DIR = f'{HOME}/upload'
 
 # Make directories--/logs and /upload
