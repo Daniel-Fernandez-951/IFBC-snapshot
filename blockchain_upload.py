@@ -16,7 +16,6 @@ NOTE:
     Change compression type (zip, tar, gztar, bztar, xztar):    COMP_FORMAT
 
     
-
 This script should work anywhere it is place, directories created are all
 relative to where the script is when executed.
 
@@ -36,22 +35,15 @@ VERSION = 0.5
 
 # Configurable Variables
 WALLET_NAME = 'default'
-COMP_FORMAT = 'zip'
+_FORMAT = 'zip'
 
-# Configure file extension
-if COMP_FORMAT == 'zip':
-    FILE_TYPE = '.zip'
-elif COMP_FORMAT == 'tar':
-    FILE_TYPE = '.tar'
-elif COMP_FORMAT == 'gztar':
-    FILE_TYPE = '.tar.gz'
-elif COMP_FORMAT == 'bztar':
-    FILE_TYPE = '.tar.bz2'
-elif COMP_FORMAT == 'xztar':
-    FILE_FORMAT = '.tar.xz'
-else:
-    # Force ZIP type as default
-    FILE_TYPE, COMP_FORMAT = '.zip', 'zip'
+COMP_MAP = {
+    'zip': '.zip',
+    'tar': '.tar',
+    'gztar': '.tar.gz',
+    'bztar': '.tar.bz2',
+    'xztar': '.tar.xz'
+}
 
 HOME = os.environ['HOME']
 FILENAME_UTC = 'ironfish_db'
@@ -79,7 +71,7 @@ def make_zip():
     # Make ZIP of directory
     try:
         shutil.make_archive(FILENAME_UTC,
-                            COMP_FORMAT,
+                            _FORMAT,
                             BLOCKCHAIN_PATH)
         logging.info(f"Zipping Finished: {time.time() - zip_start}")
     except FileNotFoundError or FileExistsError as e_zip:
@@ -88,8 +80,8 @@ def make_zip():
         return True
 
 
-def s3_upload(file_name=f"{FILENAME_UTC + FILE_TYPE}",
-              object_name=f"{FILENAME_UTC + FILE_TYPE}",
+def s3_upload(file_name=f"{FILENAME_UTC + COMP_MAP.get(_FORMAT)}",
+              object_name=f"{FILENAME_UTC + COMP_MAP.get(_FORMAT)}",
               bucket=BUCKET):
     """Upload a file to an S3 bucket
 
