@@ -16,7 +16,6 @@ NOTE:
     Change compression type (zip, tar, gztar, bztar, xztar):    COMP_FORMAT
 
     
-
 This script should work anywhere it is place, directories created are all
 relative to where the script is when executed.
 
@@ -32,11 +31,19 @@ import datetime
 import subprocess
 from botocore.exceptions import ClientError
 
-VERSION = 0.4
+VERSION = 0.5
 
 # Configurable Variables
 WALLET_NAME = 'default'
-COMP_FORMAT = 'zip'
+_FORMAT = 'zip'
+
+COMP_MAP = {
+    'zip': '.zip',
+    'tar': '.tar',
+    'gztar': '.tar.gz',
+    'bztar': '.tar.bz2',
+    'xztar': '.tar.xz'
+}
 
 HOME = os.environ['HOME']
 FILENAME_UTC = 'ironfish_db'
@@ -64,7 +71,7 @@ def make_zip():
     # Make ZIP of directory
     try:
         shutil.make_archive(FILENAME_UTC,
-                            COMP_FORMAT,
+                            _FORMAT,
                             BLOCKCHAIN_PATH)
         logging.info(f"Zipping Finished: {time.time() - zip_start}")
     except FileNotFoundError or FileExistsError as e_zip:
@@ -73,9 +80,9 @@ def make_zip():
         return True
 
 
-def upload_file(file_name=f"{FILENAME_UTC}.{COMP_FORMAT}",
-                object_name=f"{FILENAME_UTC}.{COMP_FORMAT}",
-                bucket=BUCKET):
+def s3_upload(file_name=f"{FILENAME_UTC + COMP_MAP.get(_FORMAT)}",
+              object_name=f"{FILENAME_UTC + COMP_MAP.get(_FORMAT)}",
+              bucket=BUCKET):
     """Upload a file to an S3 bucket
 
     :param file_name: File to upload
@@ -99,7 +106,7 @@ def upload_file(file_name=f"{FILENAME_UTC}.{COMP_FORMAT}",
 
 def main():
     _made_zip = make_zip()
-    _uploaded = upload_file()
+    _uploaded = s3_upload()
 
     if _uploaded and _made_zip is True:
         return True
