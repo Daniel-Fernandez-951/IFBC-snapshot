@@ -32,11 +32,26 @@ import datetime
 import subprocess
 from botocore.exceptions import ClientError
 
-VERSION = 0.4
+VERSION = 0.5
 
 # Configurable Variables
 WALLET_NAME = 'default'
 COMP_FORMAT = 'zip'
+
+# Configure file extension
+if COMP_FORMAT == 'zip':
+    FILE_TYPE = '.zip'
+elif COMP_FORMAT == 'tar':
+    FILE_TYPE = '.tar'
+elif COMP_FORMAT == 'gztar':
+    FILE_TYPE = '.tar.gz'
+elif COMP_FORMAT == 'bztar':
+    FILE_TYPE = '.tar.bz2'
+elif COMP_FORMAT == 'xztar':
+    FILE_FORMAT = '.tar.xz'
+else:
+    # Force ZIP type as default
+    FILE_TYPE, COMP_FORMAT = '.zip', 'zip'
 
 HOME = os.environ['HOME']
 FILENAME_UTC = 'ironfish_db'
@@ -73,9 +88,9 @@ def make_zip():
         return True
 
 
-def upload_file(file_name=f"{FILENAME_UTC}.{COMP_FORMAT}",
-                object_name=f"{FILENAME_UTC}.{COMP_FORMAT}",
-                bucket=BUCKET):
+def s3_upload(file_name=f"{FILENAME_UTC + FILE_TYPE}",
+              object_name=f"{FILENAME_UTC + FILE_TYPE}",
+              bucket=BUCKET):
     """Upload a file to an S3 bucket
 
     :param file_name: File to upload
@@ -99,7 +114,7 @@ def upload_file(file_name=f"{FILENAME_UTC}.{COMP_FORMAT}",
 
 def main():
     _made_zip = make_zip()
-    _uploaded = upload_file()
+    _uploaded = s3_upload()
 
     if _uploaded and _made_zip is True:
         return True
