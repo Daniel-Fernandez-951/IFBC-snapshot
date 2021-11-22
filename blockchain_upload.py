@@ -105,8 +105,22 @@ def s3_upload(file_name=f"{FILENAME_UTC + COMP_MAP.get(_FORMAT)}",
 
 
 def main():
+    # Stop Node
+    try:
+        node_pid = int(subprocess.check_output(["pidof", "node"]).decode('utf-8').strip('\n'))
+        arg_off = f"kill -9 {node_pid}"
+        os.system(arg_off)
+    except subprocess.CalledProcessError:
+        logging.warning(f"Node was not running")
+
+    # Run backup/upload
     _made_zip = make_zip()
     _uploaded = s3_upload()
+
+    # Start Node
+    # TODO: Make universal/configurable to custom bin path
+    # os.system("./ironfish/ironfish-cli/bin/ironfish start > /dev/null 2>&1 &")
+    os.system("nohup ./ironfish/ironfish-cli/bin/ironfish start > /dev/null 2>&1 &")
 
     if _uploaded and _made_zip is True:
         return True
