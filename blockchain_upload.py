@@ -118,7 +118,7 @@ def main():
     _uploaded = s3_upload()
 
     # Start Node
-    # TODO: Make universal/configurable to custom bin path
+    # TODO: Make universal/configurable to bin path
     # os.system("./ironfish/ironfish-cli/bin/ironfish start > /dev/null 2>&1 &")
     os.system("nohup ./ironfish/ironfish-cli/bin/ironfish start > /dev/null 2>&1 &")
 
